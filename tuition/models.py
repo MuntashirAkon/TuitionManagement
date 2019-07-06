@@ -55,6 +55,7 @@ class Proposal(models.Model):
 class Answer(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     proposal = models.ForeignKey(Proposal, on_delete=models.CASCADE)
+    answer = models.TextField(verbose_name='Answer')
 
     def __str__(self):
         return self.question.__str__()
