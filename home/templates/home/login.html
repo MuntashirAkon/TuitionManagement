@@ -39,26 +39,40 @@
   {% endif %}
   <div class="login-type row">
     <div class="col-md-6">
-        <a class="btn btn-light btn-block" data-toggle="collapse" href="#login_client" role="button"
-       aria-expanded="true" aria-controls="login_client">Client</a>
+      <a class="btn btn-light btn-block"
+        {% if is_client %}
+          href="{% url 'client-home' %}"
+        {% else %}
+          data-toggle="collapse" href="#login_client" role="button" aria-expanded="true" aria-controls="login_client"
+        {% endif %}
+          >Client</a>
     </div>
     <div class="col-md-6">
-    <a class="btn btn-light btn-block collapsed" data-toggle="collapse" href="#login_tutor" role="button"
-       aria-expanded="false" aria-controls="login_tutor">Tutor</a>
+      <a class="btn btn-light btn-block collapsed"
+        {% if is_tutor %}
+          href="{% url 'tutor-home' %}"
+        {% else %}
+          data-toggle="collapse" href="#login_tutor" role="button" aria-expanded="false" aria-controls="login_tutor"
+        {% endif %}
+          >Tutor</a>
     </div>
   </div>
   <div id="forms">
+  {% if not is_client %}
   <form class="collapse show" id="login_client" method="post" action="{% url 'client-login' %}" data-parent="#forms">
     {% csrf_token %}
     <input class="form-control" type="email" name="email" placeholder="Enter your email address" required>
     <input class="form-control" type="password" name="password" placeholder="Enter password" required>
-    <button class="btn btn-dark float-right" type="submit">Login</button>
+    <button class="btn btn-dark float-right" type="submit">Login as Client</button>
   </form>
+  {% endif %}
+  {% if not is_tutor %}
   <form class="collapse" id="login_tutor" method="post" action="{% url 'tutor-login' %}" data-parent="#forms">
     {% csrf_token %}
     <input class="form-control" type="email" name="email" placeholder="Enter your email address" required>
     <input class="form-control" type="password" name="password" placeholder="Enter password" required>
-    <button class="btn btn-dark float-right" type="submit">Login</button>
+    <button class="btn btn-dark float-right" type="submit">Login as Tutor</button>
   </form>
+  {% endif %}
   </div>
 {% endblock content %}

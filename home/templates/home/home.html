@@ -39,9 +39,9 @@
   {% if messages %}
     {% for message in messages %}
       {% if message.tags == 'error' %}
-        <div class="alert alert-danger">{{ message }}</div>
+        <nav class="navbar navbar-nav small fixed-top alert alert-danger" style="border-radius: 0">{{ message }}</nav>
       {% else %}
-        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        <nav class="navbar navbar-nav small fixed-top alert alert-{{ message.tags }}" style="border-radius: 0">{{ message }}</nav>
       {% endif %}
     {% endfor %}
   {% endif %}
@@ -54,29 +54,17 @@
       </div>
     </div>
   </header>
-
-  <!--section id="about" class="about-section text-center">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-8 mx-auto">
-          <h2 class="text-white mb-4">Tuition Management System</h2>
-          <p class="text-white-50">Tuition Management System is a free online service to find tutors your children/client.</p>
-        </div>
-      </div>
-    </div>
-  </section-->
-
   <section id="signup_tutor" class="signup-section">
     <div class="container">
       <div class="row">
         <div class="col-md-10 col-lg-8 mx-auto text-center">
-          <h1 class="text-light text-uppercase">Sign up as a tutor</h1>
+          <h1 class="text-uppercase">Sign up as a tutor</h1>
           <form method="post" action="{% url 'register-action' %}">
             {% csrf_token %}
             <input class="form-control" type="hidden" name="user_type" value="tutor">
             <input class="form-control" type="text" name="full_name" placeholder="Enter your full name" required>
             <input class="form-control" type="email" name="email" placeholder="Enter your email address" required>
-            <input class="form-control" type="number" name="phone" placeholder="Enter your phone number" required>
+            <!--input class="form-control" type="number" name="phone" placeholder="Enter your phone number" required-->
             <input class="form-control" type="password" name="password" placeholder="Enter password" required>
             <button class="btn btn-dark float-right" type="submit">Proceed <i class="fa fa-arrow-circle-right"></i></button>
           </form>
@@ -96,7 +84,7 @@
             <input class="form-control" type="hidden" name="user_type" value="client">
             <input class="form-control" type="text" name="full_name" placeholder="Enter your full name" required>
             <input class="form-control" type="email" name="email" placeholder="Enter your email address" required>
-            <input class="form-control" type="number" name="phone" placeholder="Enter your phone number" required>
+            <!--input class="form-control" type="number" name="phone" placeholder="Enter your phone number" required-->
             <input class="form-control" type="password" name="password" placeholder="Enter password" required>
             <button class="btn btn-dark float-right" type="submit">Proceed <i class="fa fa-arrow-circle-right"></i></button>
           </form>
