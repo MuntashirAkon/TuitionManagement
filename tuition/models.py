@@ -36,7 +36,7 @@ class Assignee(models.Model):  # taken = True
     ad = models.ForeignKey(Ad, on_delete=models.CASCADE, verbose_name="Ad")
     tutor = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Tutor")
     from_date = models.DateField(null=False, verbose_name="Date Started")
-    to_date = models.DateField(verbose_name="Date finished")
+    to_date = models.DateField(null=True, verbose_name="Date finished", blank=True)
 
     def __str__(self):
         return self.tutor.__str__()
