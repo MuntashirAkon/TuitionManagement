@@ -1,0 +1,64 @@
+{% extends 'home/base.html' %}
+{% load static %}
+{% block content %}
+  <style>
+  body{
+      background: -webkit-gradient(linear, left top, left bottom, from(rgba(22, 22, 22, 0.1)), color-stop(75%, rgba(22, 22, 22, 0.5)), to(#161616)), url("{% static 'img/bg-masthead.jpg' %}");
+      background: linear-gradient(to bottom, rgba(22, 22, 22, 0.1) 0%, rgba(22, 22, 22, 0.5) 75%, #161616 100%), url("{% static 'img/bg-masthead.jpg' %}");
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: scroll;
+      background-size: cover;
+  }
+  header .container {
+      padding-top: 8em;
+  }
+  .login-type {
+      margin-bottom: 10px;
+  }
+  .login-type a[aria-expanded="true"] {
+      color: black;
+  }
+  .login-type a[aria-expanded="false"] {
+      background-color: gray;
+      color: black;
+  }
+  #forms .collapsing {
+    transition: none;
+  }
+  </style>
+  <h1 class="text-light text-uppercase text-center">Login</h1>
+  {% if messages %}
+    {% for message in messages %}
+      {% if message.tags == 'error' %}
+        <div class="alert alert-danger">{{ message }}</div>
+      {% else %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+  <div class="login-type row">
+    <div class="col-md-6">
+        <a class="btn btn-light btn-block" data-toggle="collapse" href="#login_client" role="button"
+       aria-expanded="true" aria-controls="login_client">Client</a>
+    </div>
+    <div class="col-md-6">
+    <a class="btn btn-light btn-block collapsed" data-toggle="collapse" href="#login_tutor" role="button"
+       aria-expanded="false" aria-controls="login_tutor">Tutor</a>
+    </div>
+  </div>
+  <div id="forms">
+  <form class="collapse show" id="login_client" method="post" action="{% url 'client-login' %}" data-parent="#forms">
+    {% csrf_token %}
+    <input class="form-control" type="email" name="email" placeholder="Enter your email address" required>
+    <input class="form-control" type="password" name="password" placeholder="Enter password" required>
+    <button class="btn btn-dark float-right" type="submit">Login</button>
+  </form>
+  <form class="collapse" id="login_tutor" method="post" action="{% url 'tutor-login' %}" data-parent="#forms">
+    {% csrf_token %}
+    <input class="form-control" type="email" name="email" placeholder="Enter your email address" required>
+    <input class="form-control" type="password" name="password" placeholder="Enter password" required>
+    <button class="btn btn-dark float-right" type="submit">Login</button>
+  </form>
+  </div>
+{% endblock content %}

@@ -1,0 +1,165 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}">
+  <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Varela+Round" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+
+  <title>Tuition Management System</title>
+
+  <link href="{% static 'css/grayscale.min.css' %}" rel="stylesheet">
+</head>
+
+<body id="page-top">
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand js-scroll-trigger" href="#page-top">TMS</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link js-scroll-trigger" href="#contact">Contact</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link btn-danger" style="border-radius: 0;color: gold;" href="{% url 'login-page' %}">Login</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="masthead">
+  {% if messages %}
+    {% for message in messages %}
+      {% if message.tags == 'error' %}
+        <div class="alert alert-danger">{{ message }}</div>
+      {% else %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+    <div class="container d-flex h-100 align-items-center">
+      <div class="mx-auto text-center">
+        <h1 class="mx-auto my-0 text-uppercase">Tuition Management System</h1>
+        <h2 class="text-white-50 mx-auto mt-2 mb-5">The best place to find the suitable tutor for your children</h2>
+        <a href="#signup_tutor" class="btn btn-outline-light js-scroll-trigger">I'm a tutor</a>
+        <a href="#signup_client" class="btn btn-outline-light js-scroll-trigger">I'm looking for a tutor</a>
+      </div>
+    </div>
+  </header>
+
+  <!--section id="about" class="about-section text-center">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 mx-auto">
+          <h2 class="text-white mb-4">Tuition Management System</h2>
+          <p class="text-white-50">Tuition Management System is a free online service to find tutors your children/client.</p>
+        </div>
+      </div>
+    </div>
+  </section-->
+
+  <section id="signup_tutor" class="signup-section">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-10 col-lg-8 mx-auto text-center">
+          <h1 class="text-light text-uppercase">Sign up as a tutor</h1>
+          <form method="post" action="{% url 'register-action' %}">
+            {% csrf_token %}
+            <input class="form-control" type="hidden" name="user_type" value="tutor">
+            <input class="form-control" type="text" name="full_name" placeholder="Enter your full name" required>
+            <input class="form-control" type="email" name="email" placeholder="Enter your email address" required>
+            <input class="form-control" type="number" name="phone" placeholder="Enter your phone number" required>
+            <input class="form-control" type="password" name="password" placeholder="Enter password" required>
+            <button class="btn btn-dark float-right" type="submit">Proceed <i class="fa fa-arrow-circle-right"></i></button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Signup Section -->
+  <section id="signup_client" class="signup-section">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-10 col-lg-8 mx-auto text-center">
+          <h1 class="text-light text-uppercase">Sign up as a client</h1>
+          <form method="post" action="{% url 'register-action' %}">
+            {% csrf_token %}
+            <input class="form-control" type="hidden" name="user_type" value="client">
+            <input class="form-control" type="text" name="full_name" placeholder="Enter your full name" required>
+            <input class="form-control" type="email" name="email" placeholder="Enter your email address" required>
+            <input class="form-control" type="number" name="phone" placeholder="Enter your phone number" required>
+            <input class="form-control" type="password" name="password" placeholder="Enter password" required>
+            <button class="btn btn-dark float-right" type="submit">Proceed <i class="fa fa-arrow-circle-right"></i></button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" class="contact-section bg-black">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4 mb-3 mb-md-0">
+          <div class="card py-4 h-100">
+            <div class="card-body text-center">
+{#              <i class="fas fa-map-marked-alt text-primary mb-2"></i>#}
+              <h4 class="text-uppercase m-0">Address</h4>
+              <hr class="my-4">
+              <div class="small text-black-50">RUET, Rajshahi</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 mb-3 mb-md-0">
+          <div class="card py-4 h-100">
+            <div class="card-body text-center">
+{#              <i class="far fa-envelope text-primary mb-2"></i>#}
+              <h4 class="text-uppercase m-0">Email</h4>
+              <hr class="my-4">
+              <div class="small text-black-50">
+                <a href="#">info@tms.com</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 mb-3 mb-md-0">
+          <div class="card py-4 h-100">
+            <div class="card-body text-center">
+{#              <i class="fas fa-mobile-alt text-primary mb-2"></i>#}
+              <h4 class="text-uppercase m-0">Phone</h4>
+              <hr class="my-4">
+                <div class="small text-black-50"><a href="tel:+8801123456789">+880 1123 456 789</a></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <footer class="bg-black small text-center text-white-50">
+    <div class="container">
+      Copyright &copy; Tuition Management System
+    </div>
+  </footer>
+
+  <!-- Bootstrap core JavaScript -->
+  <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+  <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+
+  <!-- Plugin JavaScript -->
+  <script src="{% static 'vendor/jquery-easing/jquery.easing.min.js' %}"></script>
+
+  <!-- Custom scripts for this template -->
+  <script src="{% static 'js/grayscale.min.js' %}"></script>
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+</html>
