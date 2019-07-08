@@ -78,8 +78,9 @@ class User(AbstractBaseUser):
         return self.email
 
 
-# class Phone(models.Model):
-#     pass
+class Phone(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    phone_no = models.CharField(max_length=20, null=False)
 
 
 class Education(models.Model):
