@@ -40,27 +40,27 @@
   {% endif %}
   <div class="login-type row">
     <div class="col-md-6">
-      <a class="btn btn-light btn-block" data-toggle="collapse" href="#login_client" role="button"
+      <a data-toggle="collapse" href="#login_client" role="button" aria-controls="login_client"
        {% if current_tab == 'client' %}
-         aria-expanded="true"
+         class="btn btn-light btn-block" aria-expanded="true"
        {% else %}
-         aria-expanded="false"
+         class="btn btn-light btn-block collapsed" aria-expanded="false"
        {% endif %}
-         aria-controls="login_client">Client</a>
+         >Client</a>
     </div>
     <div class="col-md-6">
-      <a class="btn btn-light btn-block collapsed" data-toggle="collapse" href="#login_tutor" role="button"
+      <a data-toggle="collapse" href="#login_tutor" role="button" aria-controls="login_tutor"
        {% if current_tab == 'tutor' %}
-         aria-expanded="true"
+         class="btn btn-light btn-block" aria-expanded="true"
        {% else %}
-         aria-expanded="false"
+         class="btn btn-light btn-block collapsed" aria-expanded="false"
        {% endif %}
-         aria-controls="login_tutor">Tutor</a>
+         >Tutor</a>
     </div>
   </div>
   <div id="forms">
   {% if not is_client %}
-    <form class="collapse show" id="login_client" method="post" action="{% url 'client-login' %}" data-parent="#forms">
+    <form class="collapse {{ client_tab }}" id="login_client" method="post" action="{% url 'client-login' %}" data-parent="#forms">
       {% csrf_token %}
       <input class="form-control" type="email" name="email" placeholder="Enter your email address" required
              value="{{ email }}">
@@ -68,14 +68,14 @@
       <button class="btn btn-dark float-right" type="submit">Login as Client</button>
     </form>
   {% else %}
-    <div class="collapse show" id="login_client" data-parent="#forms">
+    <div class="collapse {{ client_tab }}" id="login_client" data-parent="#forms">
       <p class="text-light">You're already logged in as a client.</p>
       <a href="{% url 'client-logout' %}" class="btn btn-danger">Logout</a>
       <a href="{% url 'client-home' %}" class="btn btn-dark float-right">Goto Client area</a>
     </div>
   {% endif %}
   {% if not is_tutor %}
-    <form class="collapse" id="login_tutor" method="post" action="{% url 'tutor-login' %}" data-parent="#forms">
+    <form class="collapse {{ tutor_tab }}" id="login_tutor" method="post" action="{% url 'tutor-login' %}" data-parent="#forms">
       {% csrf_token %}
       <input class="form-control" type="email" name="email" placeholder="Enter your email address" required
              value="{{ email }}">
@@ -83,7 +83,7 @@
       <button class="btn btn-dark float-right" type="submit">Login as Tutor</button>
     </form>
   {% else %}
-    <div class="collapse" id="login_tutor" data-parent="#forms">
+    <div class="collapse {{ tutor_tab }}" id="login_tutor" data-parent="#forms">
       <p class="text-light">You're already logged in as a tutor.</p>
       <a href="{% url 'tutor-logout' %}" class="btn btn-danger">Logout</a>
       <a href="{% url 'tutor-home' %}" class="btn btn-dark float-right">Goto Tutor area</a>
