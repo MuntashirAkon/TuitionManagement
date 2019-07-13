@@ -82,6 +82,9 @@ class Phone(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     phone_no = models.CharField(max_length=20, null=False)
 
+    def __str__(self):
+        return '{} - {}'.format(self.user.email, self.phone_no)
+
 
 class Education(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -94,3 +97,12 @@ class Education(models.Model):
 
     def __str__(self):
         return self.institute
+
+
+class Verification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    type = models.CharField(max_length=50, verbose_name='File Type')
+    file = models.TextField(verbose_name='File location')
+
+    def __str__(self):
+        return '{} - {}'.format(self.user.email, self.type)
