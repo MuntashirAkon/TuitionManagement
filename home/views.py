@@ -9,16 +9,25 @@ def home(request):
 
 
 def login(request):
+    current_tab = request.GET.get('tab', 'client')
+    email = request.GET.get('email', '')
+    context = {
+        'logged_in': False,
+        'is_client': False,
+        'is_tutor': False,
+        'email': email,
+        'current_tab': current_tab,
+        'tutor_tab': 'show' if current_tab == 'tutor' else '',
+        'client_tab': 'show' if current_tab == 'client' else '',
+    }
     if request.user.is_authenticated:
         user = User.objects.get(pk=request.user.pk)
-        context = {
-            'logged_in': True,
-            'is_client': user.is_client,
-            'is_tutor': user.is_tutor,
-        }
+        context['logged_in'] = True
+        context['is_client'] = user.is_client
+        context['is_tutor'] = user.is_tutor
         return render(request, 'home/login.html', context=context)
     else:
-        return render(request, 'home/login.html')
+        return render(request, 'home/login.html', context=context)
 
 
 def register(request):
