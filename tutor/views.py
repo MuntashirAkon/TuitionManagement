@@ -1,5 +1,89 @@
-from django.shortcuts import render
-from django.http import HttpResponse
+from django.shortcuts import render, redirect
+from users.models import User
+from tuition.models import Ad, Assignee, Proposal, Question, Answer
+from django.utils import timezone
+from django.contrib.auth import (
+    logout as logout_user,
+    login as login_user,
+    authenticate,
+)
+from django.contrib import messages
+from django.urls import reverse
+from .decorators import tutor_required
+
+# TODO: Check if the required fields of the profile sections are filled up
+
+
+@tutor_required
+def feed(request):
+    return render(request, 'tutor/feed.html', context={
+        'feed_list': get_feed_list(
+            request,
+            Ad.objects.filter(timeout__gte=timezone.now(), taken=False).order_by('-ad_time')
+        ),
+        'display_url': True,
+        'tutor_feed': 'active',
+    })
+
+
+@tutor_required
+def view_profile(request, profile_id):
+    """View user or client profile"""
+    if request.user.pk == profile_id:
+        user = User.objects.get(pk=profile_id)
+        work_history = Assignee.objects.filter(tutor=request.user, to_date__lte=timezone.now())
+        return render(request, 'tutor/view_profile.html', context={
+            'profile': user,
+            'education': user.education_set.all().order_by('-to_year'),
+            'work_history': work_history,
+            'tutor_profile': 'active',
+        })
+    else:
+        user = User.objects.filter(pk=profile_id, is_client=True)
+        if user.exists():
+            work_history = Ad.objects.filter(client=user[0], taken=True)
+            return render(request, 'tutor/client_profile.html', context={
+                'profile': user[0],
+                'work_history': work_history
+            })
+        else:
+            return redirect('tutor-profile', request.user.pk)
+
+
+@tutor_required
+def edit_profile(request, profile_id):
+    # TODO Implement edit profile
+    if request.user.pk == profile_id:
+        return render(request, 'tutor/edit_profile.html', context={'tutor_profile': 'active', })
+    else:
+        return redirect('tutor-profile', profile_id)
+
+
+@tutor_required
+def history(request):
+    archived_list = []
+    archived_jobs = Assignee.objects.filter(tutor=request.user, to_date__lte=timezone.now())
+    for obj in archived_jobs:
+        archived_list.append(obj.ad)
+    active_list = []
+    active_jobs = Assignee.objects.filter(tutor=request.user, to_date__gt=timezone.now())
+    for obj in active_jobs:
+        active_list.append(obj.ad)
+    active_jobs = Assignee.objects.filter(tutor=request.user, to_date__isnull=True)
+    for obj in active_jobs:
+        active_list.append(obj.ad)
+    proposed = Proposal.objects.filter(tutor=request.user)
+    for obj in proposed:
+        if obj.ad.timeout >= timezone.now():
+            active_list.append(obj.ad)
+        else:
+            archived_list.append(obj.ad)
+
+    return render(request, 'tutor/history.html', context={
+        'feed_active': {'list': get_feed_list(request, active_list), 'count': len(active_list)},
+        'feed_archive': {'list': get_feed_list(request, archived_list), 'count': len(archived_list)},
+        'tutor_history': 'active',
+    })
 
 
 @tutor_required
