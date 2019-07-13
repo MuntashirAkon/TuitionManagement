@@ -103,6 +103,7 @@ class Verification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     type = models.CharField(max_length=50, verbose_name='File Type')
     file = models.TextField(verbose_name='File location')
+    verified = models.BooleanField(verbose_name='Verified', default=False)
 
     def __str__(self):
         return '{} - {}'.format(self.user.email, self.type)
