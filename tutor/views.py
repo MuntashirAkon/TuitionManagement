@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from users.models import User
+from users.models import User, Verification, Phone
 from tuition.models import Ad, Assignee, Proposal, Question, Answer
 from django.utils import timezone
 from django.contrib.auth import (
@@ -10,6 +10,7 @@ from django.contrib.auth import (
 from django.contrib import messages
 from django.urls import reverse
 from .decorators import tutor_required
+from time import time
 
 # TODO: Check if the required fields of the profile sections are filled up
 
@@ -89,19 +90,57 @@ def history(request):
 @tutor_required
 def settings(request):
     if request.POST:
-        email1 = request.POST['email1']
-        email2 = request.POST['email2']
-        phone = request.POST['phone']
-        old_pass = request.POST['old_password']
-        pass1 = request.POST['password1']
-        pass2 = request.POST['password2']
-        doc_type = request.POST['document_type']
-        # TODO Implement settings
+        email1 = request.POST.get('email1', '')
+        email2 = request.POST.get('email2', '')
+        phone = request.POST.get('phone', '')
+        old_pass = request.POST.get('old_password', '')
+        pass1 = request.POST.get('password1', '')
+        pass2 = request.POST.get('password2', '')
+        doc_type = request.POST.get('document_type', '')
+        user = User.objects.get(pk=request.user.pk)
+        # Change password
+        if old_pass != '':
+            chk_user = authenticate(email=user.email, password=old_pass, is_active=True)
+            if chk_user is not None:
+                if pass1 == pass2 and pass1 != '':
+                    user.set_password(pass1)
+                else:
+                    messages.error(request, 'Passwords do not match!')
+                    return redirect(request.path_info)
+            else:
+                messages.error(request, 'Wrong password. Please try again.')
+                return redirect(request.path_info)
+        # Add email
+        if email1 != '' and email1 == email2:
+            if User.objects.filter(email=email1).exists():
+                messages.error(request, 'Email already exists, please try with a new one.')
+                return redirect(request.path_info)
+            user.email = email1
+        # Add phone
+        if phone != '':
+            if user.phone_set.exists():
+                user.phone_set.update(phone_no=phone)
+            else:
+                user.phone_set.create(phone_no=phone)
+        # Add verification info
+        if request.FILES and doc_type != '':
+            if user.verification_set.count():
+                messages.error(request, 'Required file for verification is already uploaded.')
+                return redirect(request.path_info)
+            file_name = handle_uploaded_file(request.FILES['verification_document'])
+            user.verification_set.create(type=doc_type, file=file_name)
+        user.save()
+        messages.success(request, 'Changes are saved successfully.')
+        return redirect(request.path_info)
     else:
+        user = User.objects.get(pk=request.user.pk)
+        phone = Phone.objects.filter(user=user)
+        verification = Verification.objects.filter(user=user)
         return render(request, 'tutor/settings.html', context={
-            'verified': False,
-            'id_type': 'Student ID',
+            'verification': verification[0] if verification.exists() else False,
             'tutor_settings': 'active',
+            'email': user.email,
+            'phone': phone[0].phone_no if phone.exists() else False,
         })
 
 
@@ -185,3 +224,11 @@ def get_feed_list(request, ads):
     for ad in ads:
         ad_list.append(get_feed(request, ad))
     return ad_list
+
+
+def handle_uploaded_file(f):
+    file_name = 'file_{}_{}'.format(int(time()), f.name)
+    with open('/Volumes/Fallout/v_files/{}'.format(file_name), 'wb+') as destination:
+        for chunk in f.chunks():
+            destination.write(chunk)
+    return file_name
