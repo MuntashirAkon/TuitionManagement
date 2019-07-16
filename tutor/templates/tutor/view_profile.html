@@ -41,6 +41,9 @@
         content: 'Less';
     }
     </style>
+    {% if editable %}
+        <a href="{% url 'tutor-edit-profile' profile.pk %}">Edit profile</a>
+    {% endif %}
     <div class="user-profile card">
       <div class="card-header">
         <table>

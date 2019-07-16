@@ -12,11 +12,12 @@ from django.urls import reverse
 from .decorators import tutor_required
 from time import time
 
-# TODO: Check if the required fields of the profile sections are filled up
-
 
 @tutor_required
 def feed(request):
+    if is_profile_incomplete(request):
+        messages.info(request, 'Your profile is incomplete. Please fill out all the fields to get started.')
+        return redirect('tutor-edit-profile', request.user.pk)
     return render(request, 'tutor/feed.html', context={
         'feed_list': get_feed_list(
             request,
@@ -31,6 +32,9 @@ def feed(request):
 def view_profile(request, profile_id):
     """View user or client profile"""
     if request.user.pk == profile_id:
+        if is_profile_incomplete(request):
+            messages.info(request, 'Your profile is incomplete. Please fill out all the fields to get started.')
+            return redirect('tutor-edit-profile', request.user.pk)
         user = User.objects.get(pk=profile_id)
         work_history = Assignee.objects.filter(tutor=request.user, to_date__lte=timezone.now())
         return render(request, 'tutor/view_profile.html', context={
@@ -38,6 +42,7 @@ def view_profile(request, profile_id):
             'education': user.education_set.all().order_by('-to_year'),
             'work_history': work_history,
             'tutor_profile': 'active',
+            'editable': True,
         })
     else:
         user = User.objects.filter(pk=profile_id, is_client=True)
@@ -53,11 +58,18 @@ def view_profile(request, profile_id):
 
 @tutor_required
 def edit_profile(request, profile_id):
-    # TODO Implement edit profile
-    if request.user.pk == profile_id:
-        return render(request, 'tutor/edit_profile.html', context={'tutor_profile': 'active', })
+    if request.POST:
+        pass
     else:
-        return redirect('tutor-profile', profile_id)
+        if request.user.pk == profile_id:
+            user = User.objects.get(pk=profile_id)
+            return render(request, 'tutor/edit_profile.html', context={
+                'profile': user,
+                'education': user.education_set.all().order_by('-to_year'),
+                'tutor_profile': 'active',
+            })
+        else:
+            return redirect('tutor-profile', profile_id)
 
 
 @tutor_required
@@ -232,3 +244,11 @@ def handle_uploaded_file(f):
         for chunk in f.chunks():
             destination.write(chunk)
     return file_name
+
+
+def is_profile_incomplete(request):
+    user = User.objects.get(pk=request.user.pk)
+    if user.name == '' or user.bio == '' or user.location == '' or user.gender == '' or user.title == ''\
+            or user.overview == '' or user.expertise == '':
+        return True
+    return False
