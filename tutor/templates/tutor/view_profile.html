@@ -52,7 +52,12 @@
               <img class="card-img user-image" src="{% static 'img/Self.png' %}" alt="A portrait of {{ profile.name }}" />
             </td>
             <td>
-              <h1 class="card-title">{{ profile.name }}</h1>
+              <h1 class="card-title">
+                  {{ profile.name }}
+                  {% if profile.verification_set.first.verified %}
+                      <i class="text-info fas fa-check-circle" title="Verified tutor"></i>
+                  {% endif %}
+              </h1>
               <h6 class="card-text"><i class="fa fa-graduation-cap"></i> {{ profile.bio }}</h6>
               <h6 class="card-text"><i class="fa fa-map-marked"></i> {{ profile.location }}</h6>
               <h6 class="card-text"><i class="fa fa-user"></i> {{ profile.gender }}</h6>

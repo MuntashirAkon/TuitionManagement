@@ -36,8 +36,8 @@
     <div class="row">
       <div class="col-md-12" title="Client name"><i class="fa fa-user-circle"></i>
           <a class="card-link" href="{% url 'tutor-profile' feed.client.pk %}">{{ feed.client.name }}</a>
-          {% if feed.client.verified %}
-            <i class="fa fa-check-circle-o"></i>
+          {% if feed.client.verification_set.first.verified %}
+            <i class="text-info fas fa-check-circle" title="Verified client"></i>
           {% endif %}
       </div>
     </div>
