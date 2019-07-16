@@ -21,7 +21,7 @@ def feed(request):
     return render(request, 'tutor/feed.html', context={
         'feed_list': get_feed_list(
             request,
-            Ad.objects.filter(timeout__gte=timezone.now(), taken=False).order_by('-ad_time')
+            Ad.objects.filter(timeout__gte=timezone.now(), taken=False).exclude(client=request.user).order_by('-ad_time')
         ),
         'display_url': True,
         'tutor_feed': 'active',
@@ -74,6 +74,7 @@ def edit_profile(request, profile_id):
 
 @tutor_required
 def history(request):
+    # TODO: show feedback for archived history
     archived_list = []
     archived_jobs = Assignee.objects.filter(tutor=request.user, to_date__lte=timezone.now())
     for obj in archived_jobs:
@@ -158,6 +159,10 @@ def settings(request):
 
 @tutor_required
 def apply(request, ad_id):
+    ad = Ad.objects.filter(pk=ad_id, taken=False, timeout__gte=timezone.now()).exclude(client=request.user)
+    if not ad.exists():
+        return redirect('tutor-feed')
+
     if request.POST:
         proposal = request.POST.get('proposal', '')  # Optional
         # Check if already has a proposal
@@ -174,11 +179,7 @@ def apply(request, ad_id):
         messages.success(request, 'Successfully applied!')
         return redirect(request.path_info)
     else:
-        ad = Ad.objects.filter(pk=ad_id, taken=False, timeout__gte=timezone.now())
-        if ad.exists():
-            return render(request, 'tutor/apply.html', context={'feed': get_feed(request, ad[0])})
-        else:
-            return redirect('tutor-feed')
+        return render(request, 'tutor/apply.html', context={'feed': get_feed(request, ad[0])})
 
 
 @tutor_required
