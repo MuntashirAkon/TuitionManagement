@@ -226,7 +226,6 @@ def get_feed(request, ad):
         'client': ad.client,
         'already_applied': proposal.exists(),
         'proposal': proposal[0].proposal if proposal.exists() else False,
-        'verified': False,  # TODO
         'questions': ad.question_set,
         'answers': proposal[0].answer_set if proposal.exists() else False,
     }
