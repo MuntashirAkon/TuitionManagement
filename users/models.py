@@ -53,7 +53,8 @@ class User(AbstractBaseUser):
     gender = models.CharField(max_length=20, verbose_name='Gender')
     title = models.CharField(max_length=1000, verbose_name='Overview title')  # Overview title
     overview = models.TextField(verbose_name='Overview')
-    expertise = models.CharField(max_length=1000, verbose_name='expertise')
+    expertise = models.CharField(max_length=1000, verbose_name='Expertise')
+    profile_img = models.TextField(verbose_name='Profile Image', blank=True)
 
     USERNAME_FIELD = 'email'
 
