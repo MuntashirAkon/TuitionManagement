@@ -46,7 +46,8 @@
         <table>
           <tr>
             <td style="padding-right: 15px">
-              <img class="card-img user-image" src="{% static 'img/Self.png' %}" alt="A portrait of {{ profile.name }}" />
+              {# TODO: Change dummy image to a working one #}
+              <img class="card-img user-image" src="/static/profile_imgs/{{ profile_img }}" alt="A portrait of {{ profile.name }}" />
             </td>
             <td>
               <h1 class="card-title">

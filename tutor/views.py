@@ -11,6 +11,7 @@ from django.contrib import messages
 from django.urls import reverse
 from .decorators import tutor_required
 from time import time
+import os
 
 
 @tutor_required
@@ -18,11 +19,9 @@ def feed(request):
     if is_profile_incomplete(request):
         messages.info(request, 'Your profile is incomplete. Please fill out all the fields to get started.')
         return redirect('tutor-edit-profile', request.user.pk)
+    ads = Ad.objects.filter(timeout__gte=timezone.now(), taken=False).exclude(client=request.user).order_by('-ad_time')
     return render(request, 'tutor/feed.html', context={
-        'feed_list': get_feed_list(
-            request,
-            Ad.objects.filter(timeout__gte=timezone.now(), taken=False).exclude(client=request.user).order_by('-ad_time')
-        ),
+        'feed_list': get_feed_list(request, ads),
         'display_url': True,
         'tutor_feed': 'active',
     })
@@ -43,6 +42,7 @@ def view_profile(request, profile_id):
             'work_history': work_history,
             'tutor_profile': 'active',
             'editable': True,
+            'profile_img': os.path.basename(user.profile_img),
         })
     else:
         user = User.objects.filter(pk=profile_id, is_client=True)
@@ -50,7 +50,8 @@ def view_profile(request, profile_id):
             work_history = Ad.objects.filter(client=user[0], taken=True)
             return render(request, 'tutor/client_profile.html', context={
                 'profile': user[0],
-                'work_history': work_history
+                'work_history': work_history,
+                'profile_img': os.path.basename(user.profile_img),
             })
         else:
             return redirect('tutor-profile', request.user.pk)
@@ -59,6 +60,7 @@ def view_profile(request, profile_id):
 @tutor_required
 def edit_profile(request, profile_id):
     if request.POST:
+        # TODO: Handle edit profile
         pass
     else:
         if request.user.pk == profile_id:
@@ -140,7 +142,7 @@ def settings(request):
             if user.verification_set.count():
                 messages.error(request, 'Required file for verification is already uploaded.')
                 return redirect(request.path_info)
-            file_name = handle_uploaded_file(request.FILES['verification_document'])
+            file_name = handle_verification_file(request.FILES['verification_document'])
             user.verification_set.create(type=doc_type, file=file_name)
         user.save()
         messages.success(request, 'Changes are saved successfully.')
@@ -238,7 +240,7 @@ def get_feed_list(request, ads):
     return ad_list
 
 
-def handle_uploaded_file(f):
+def handle_verification_file(f):
     file_name = 'file_{}_{}'.format(int(time()), f.name)
     with open('/Volumes/Fallout/v_files/{}'.format(file_name), 'wb+') as destination:
         for chunk in f.chunks():
@@ -249,6 +251,14 @@ def handle_uploaded_file(f):
 def is_profile_incomplete(request):
     user = User.objects.get(pk=request.user.pk)
     if user.name == '' or user.bio == '' or user.location == '' or user.gender == '' or user.title == ''\
-            or user.overview == '' or user.expertise == '':
+            or user.overview == '' or user.expertise == '' or user.profile_img == '':
         return True
     return False
+
+
+def handle_profile_image(f):
+    file_name = 'file_{}_{}'.format(int(time()), f.name)
+    with open('/Volumes/Fallout/Projects/TuitionManagament/TuitionMGMT/TuitionManagement/users/static/profile_imgs/{}'.format(file_name), 'wb+') as destination:
+        for chunk in f.chunks():
+            destination.write(chunk)
+    return file_name
