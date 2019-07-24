@@ -11,7 +11,7 @@ from django.urls import reverse
 from django.utils import timezone
 from .decorators import client_required
 from time import time
-import datetime
+import datetime, os
 
 
 @client_required
@@ -102,11 +102,19 @@ def new(request):
 
 @client_required
 def view_profile(request, profile_id):
-    """View tutor profile"""
-    # TODO: Implement tutor profile
+    """View only tutor profile"""
     user = User.objects.filter(pk=profile_id, is_tutor=True)
-    if user is not None:
-        pass
+    if user.exists():
+        user = user[0]
+        work_history = Assignee.objects.filter(tutor=user, to_date__lte=timezone.now())
+        return render(request, 'client/view_profile.html', context={
+            'profile': user,
+            'education': user.education_set.all().order_by('-to_year'),
+            'work_history': work_history,
+            'tutor_profile': 'active',
+            'editable': True,
+            'profile_img': os.path.basename(user.profile_img),
+        })
     else:
         redirect('client-home')
 
