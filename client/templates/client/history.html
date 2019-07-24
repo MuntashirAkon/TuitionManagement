@@ -1,0 +1,10 @@
+{% extends 'client/base_client.html' %}
+
+{% block content %}
+    <div class="history">
+        <h3>History</h3>
+        {% for feed in feed_archive %}
+            {% include 'client/single_ad.inc.html' %}
+        {% endfor %}
+    </div>
+{% endblock %}
