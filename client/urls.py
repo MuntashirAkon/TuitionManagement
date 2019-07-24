@@ -9,6 +9,7 @@ urlpatterns = [
     path('ad/new/', views.new, name='client-new'),
     path('ad/<int:ad_id>/', views.view_applicants, name='client-applicants'),
     path('ad/<int:ad_id>/accept/<int:user_id>/', views.accept, name='client-accept'),
+    path('ad/<int:ad_id>/terminate/', views.terminate, name='client-terminate'),
     path('running/', views.running, name='client-running'),
     path('history/', views.history, name='client-history'),
     path('settings/', views.settings, name='client-settings'),

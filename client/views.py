@@ -45,12 +45,23 @@ def view_applicants(request, ad_id):
 def accept(request, ad_id, user_id):
     # FIXME: Redirect to the ad instead? Again, redirecting to the ad needs further improvement
     #        in the client-ad since it only shows proposals.
-    ad = Ad.objects.get(pk=ad_id)
+    ad = Ad.objects.get(pk=ad_id, client=request.user)
     ad.taken = True
     Assignee.objects.create(ad=ad, tutor_id=user_id, from_date=timezone.now())
     ad.save()
     messages.success(request, 'Proposal is accepted successfully.')
     return redirect('client-running')
+
+
+@client_required
+def terminate(request, ad_id):
+    # FIXME: Redirect to the ad instead? Again, redirecting to the ad needs further improvement
+    #        in the client-ad since it only shows proposals.
+    ad = Assignee.objects.get(ad_id=ad_id, ad__client=request.user)
+    ad.to_date = timezone.now()
+    ad.save()
+    messages.success(request, 'The tuition is terminated successfully!')  # FIXME: Prompt for feedback?
+    return redirect('client-history')
 
 
 @client_required
@@ -158,7 +169,6 @@ def history(request):
 @client_required
 def running(request):
     """Show ads that are assigned by the client"""
-    # TODO: Add the ability to end running jobs here
     active_list = []
     active_jobs = Assignee.objects.filter(to_date__gt=timezone.now(), ad__client=request.user)
     for obj in active_jobs:
@@ -169,6 +179,7 @@ def running(request):
     return render(request, 'client/running.html', context={
         'feed_list': get_feed_list(request, active_list),
         'client_running': 'active',
+        'show_end_job': True,
     })
 
 

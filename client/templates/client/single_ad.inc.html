@@ -33,5 +33,8 @@
       </div>
       <div class="col-md-6" title="Location"><i class="fa fa-map-marked"></i> {{ feed.location }}</div>
     </div>
+    {% if show_end_job %}
+        <a href="{% url 'client-terminate' feed.pk %}" class="btn btn-dark">End tuition</a>
+    {% endif %}
   </div>
 </div>
