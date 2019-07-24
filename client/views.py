@@ -135,29 +135,16 @@ def view_profile(request, profile_id):
 
 @client_required
 def history(request):
-    # TODO: Implement history
     # TODO: show feedback for archived history
     archived_list = []
-    archived_jobs = Assignee.objects.filter(tutor=request.user, to_date__lte=timezone.now())
+    archived_jobs = Assignee.objects.filter(to_date__lte=timezone.now())
     for obj in archived_jobs:
         archived_list.append(obj.ad)
-    active_list = []
-    active_jobs = Assignee.objects.filter(tutor=request.user, to_date__gt=timezone.now())
-    for obj in active_jobs:
-        active_list.append(obj.ad)
-    active_jobs = Assignee.objects.filter(tutor=request.user, to_date__isnull=True)
-    for obj in active_jobs:
-        active_list.append(obj.ad)
-    proposed = Proposal.objects.filter(tutor=request.user)
-    for obj in proposed:
-        if obj.ad.timeout >= timezone.now():
-            active_list.append(obj.ad)
-        else:
-            archived_list.append(obj.ad)
-
+    timed_out_ads = Ad.objects.filter(timeout__lte=timezone.now(), taken=False)
+    for obj in timed_out_ads:
+        archived_list.append(obj)
     return render(request, 'client/history.html', context={
-        'feed_active': {'list': get_feed_list(request, active_list), 'count': len(active_list)},
-        'feed_archive': {'list': get_feed_list(request, archived_list), 'count': len(archived_list)},
+        'feed_archive': get_feed_list(request, archived_list),
         'tutor_history': 'active',
     })
 
