@@ -11,7 +11,8 @@ from django.urls import reverse
 from django.utils import timezone
 from .decorators import client_required
 from time import time
-import datetime, os
+import datetime
+import os
 
 
 @client_required
@@ -28,8 +29,21 @@ def home(request):
 
 
 @client_required
-def view_applicants(request):
-    # TODO: View applicants and hire them if needed
+def view_applicants(request, ad_id):
+    ad = Ad.objects.filter(pk=ad_id, taken=False, timeout__gte=timezone.now(), client=request.user)
+    if ad.exists():
+        proposals = Proposal.objects.filter(ad=ad_id)
+        return render(request, 'client/view_ad.html', context={
+            'feed': get_feed(request, ad[0]),
+            'proposals': proposals if proposals.exists() else False,
+        })
+    else:
+        return redirect('client-home')
+
+
+@client_required
+def accept(request, ad_id, user_id):
+    # TODO: Accept tutor's request
     pass
 
 
@@ -122,7 +136,30 @@ def view_profile(request, profile_id):
 @client_required
 def history(request):
     # TODO: Implement history
-    pass
+    # TODO: show feedback for archived history
+    archived_list = []
+    archived_jobs = Assignee.objects.filter(tutor=request.user, to_date__lte=timezone.now())
+    for obj in archived_jobs:
+        archived_list.append(obj.ad)
+    active_list = []
+    active_jobs = Assignee.objects.filter(tutor=request.user, to_date__gt=timezone.now())
+    for obj in active_jobs:
+        active_list.append(obj.ad)
+    active_jobs = Assignee.objects.filter(tutor=request.user, to_date__isnull=True)
+    for obj in active_jobs:
+        active_list.append(obj.ad)
+    proposed = Proposal.objects.filter(tutor=request.user)
+    for obj in proposed:
+        if obj.ad.timeout >= timezone.now():
+            active_list.append(obj.ad)
+        else:
+            archived_list.append(obj.ad)
+
+    return render(request, 'client/history.html', context={
+        'feed_active': {'list': get_feed_list(request, active_list), 'count': len(active_list)},
+        'feed_archive': {'list': get_feed_list(request, archived_list), 'count': len(archived_list)},
+        'tutor_history': 'active',
+    })
 
 
 @client_required
