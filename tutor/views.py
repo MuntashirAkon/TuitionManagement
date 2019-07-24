@@ -77,6 +77,7 @@ def edit_profile(request, profile_id):
 @tutor_required
 def history(request):
     # TODO: show feedback for archived history
+    # FIXME: There may be duplicate values
     archived_list = []
     archived_jobs = Assignee.objects.filter(tutor=request.user, to_date__lte=timezone.now())
     for obj in archived_jobs:

@@ -44,6 +44,8 @@ def view_applicants(request, ad_id):
 @client_required
 def accept(request, ad_id, user_id):
     # TODO: Accept tutor's request
+    # ad.taken = True
+    # Assignee = user_id
     pass
 
 
@@ -137,23 +139,33 @@ def view_profile(request, profile_id):
 def history(request):
     # TODO: show feedback for archived history
     archived_list = []
-    archived_jobs = Assignee.objects.filter(to_date__lte=timezone.now())
+    archived_jobs = Assignee.objects.filter(to_date__lte=timezone.now(), ad__client=request.user)
     for obj in archived_jobs:
         archived_list.append(obj.ad)
-    timed_out_ads = Ad.objects.filter(timeout__lte=timezone.now(), taken=False)
+    timed_out_ads = Ad.objects.filter(timeout__lte=timezone.now(), taken=False, client=request.user)
     for obj in timed_out_ads:
         archived_list.append(obj)
     return render(request, 'client/history.html', context={
         'feed_archive': get_feed_list(request, archived_list),
-        'tutor_history': 'active',
+        'client_history': 'active',
     })
 
 
 @client_required
 def running(request):
     """Show ads that are assigned by the client"""
-    # TODO: Show running jobs, ability to end them here
-    pass
+    # TODO: Add the ability to end running jobs here
+    active_list = []
+    active_jobs = Assignee.objects.filter(to_date__gt=timezone.now(), ad__client=request.user)
+    for obj in active_jobs:
+        active_list.append(obj.ad)
+    active_jobs = Assignee.objects.filter(to_date__isnull=True, ad__client=request.user)
+    for obj in active_jobs:
+        active_list.append(obj.ad)
+    return render(request, 'client/running.html', context={
+        'feed_list': get_feed_list(request, active_list),
+        'client_running': 'active',
+    })
 
 
 @client_required
