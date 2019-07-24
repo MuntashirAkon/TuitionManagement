@@ -43,10 +43,14 @@ def view_applicants(request, ad_id):
 
 @client_required
 def accept(request, ad_id, user_id):
-    # TODO: Accept tutor's request
-    # ad.taken = True
-    # Assignee = user_id
-    pass
+    # FIXME: Redirect to the ad instead? Again, redirecting to the ad needs further improvement
+    #        in the client-ad since it only shows proposals.
+    ad = Ad.objects.get(pk=ad_id)
+    ad.taken = True
+    Assignee.objects.create(ad=ad, tutor_id=user_id, from_date=timezone.now())
+    ad.save()
+    messages.success(request, 'Proposal is accepted successfully.')
+    return redirect('client-running')
 
 
 @client_required
