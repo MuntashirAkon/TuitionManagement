@@ -1,17 +1,17 @@
-from django.http import HttpResponse
 from django.contrib.auth import (
     authenticate,
     login as login_user,
     logout as logout_user
 )
 from users.models import User, Phone, Verification
-from tuition.models import Ad
+from tuition.models import Ad, Assignee, Proposal, Question
 from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.utils import timezone
 from .decorators import client_required
 from time import time
+import datetime
 
 
 @client_required
@@ -35,8 +35,69 @@ def view_applicants(request):
 
 @client_required
 def new(request):
-    # TODO: Implement create new add
-    pass
+    if request.POST:
+        std_genders = {
+            'male': 'Male',
+            'female': 'Female',
+            'mixed': 'Mixed',
+        }
+        pref_genders = {
+            'male': 'Male',
+            'female': 'Female',
+            'any': 'Any',
+        }
+        title = request.POST.get('title', False)
+        description = request.POST.get('description', False)
+        questions = request.POST.get('questions', False)
+        subjects = request.POST.get('subjects', False)
+        _type = request.POST.get('type', False)
+        grade = request.POST.get('grade', False)
+        gender = request.POST.get('gender', False)
+        std_count = request.POST.get('std_count', False)
+        pref_gender = request.POST.get('pref_gender', False)
+        _time = request.POST.get('time', False)
+        days = request.POST.get('days', False)
+        location = request.POST.get('location', False)
+        salary = request.POST.get('salary', False)
+        timeout = request.POST.get('timeout', False)  # date
+        try:
+            t_timeout = datetime.datetime.strptime(timeout, "%d/%m/%Y").date()
+        except ValueError:
+            t_timeout = False
+
+        if title and description and subjects and _type and grade and std_genders.get(gender, False) and std_count and\
+                pref_genders.get(pref_gender, False) and _time and days and location and salary and t_timeout:
+            ad = Ad.objects.create(title=title, description=description, subjects=subjects, type=_type, grade=grade,
+                                   gender=std_genders.get(gender, False), std_count=int(std_count),
+                                   pref_gender=pref_genders.get(pref_gender, False), time=_time,
+                                   days=int(days), location=location, salary=int(salary), client=request.user,
+                                   timeout=t_timeout)
+            if ad is not None:
+                if questions:
+                    questions = questions.split('\n')
+                    for question in questions:
+                        Question.objects.create(ad=ad, question=question)
+                messages.success(request, 'Ad is successfully created!')
+                return redirect('client-applicants', ad.pk)
+
+        messages.error(request, 'Please fill out all the fields.')
+        return render(request, 'client/new_ad.html', context={
+            'title': title,
+            'description': description,
+            'subjects': subjects,
+            'type': _type,
+            'grade': grade,
+            'gender': gender,
+            'std_count': std_count,
+            'pref_gender': pref_gender,
+            'time': _time,
+            'days': days,
+            'location': location,
+            'salary': salary,
+            'timout': timeout,
+        })
+    else:
+        return render(request, 'client/new_ad.html')
 
 
 @client_required
