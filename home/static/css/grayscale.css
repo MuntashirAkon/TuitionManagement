@@ -148,6 +148,10 @@
   letter-spacing: .15rem;
 }
 
+.btn-small {
+  padding: .375rem .75rem !important;
+}
+
 .btn-primary {
   background-color: #64a19d;
 }
