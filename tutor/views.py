@@ -77,7 +77,6 @@ def edit_profile(request, profile_id):
 
 @tutor_required
 def history(request):
-    # FIXME: There may be duplicate values
     archived_list = []
     archived_jobs = Assignee.objects.filter(tutor=request.user, to_date__lte=timezone.now())
     for obj in archived_jobs:
@@ -89,7 +88,7 @@ def history(request):
     active_jobs = Assignee.objects.filter(tutor=request.user, to_date__isnull=True)
     for obj in active_jobs:
         active_list.append(obj.ad)
-    proposed = Proposal.objects.filter(tutor=request.user)
+    proposed = Proposal.objects.filter(tutor=request.user).exclude(ad__assignee__tutor=request.user)
     for obj in proposed:
         if obj.ad.timeout >= timezone.now():
             active_list.append(obj.ad)
