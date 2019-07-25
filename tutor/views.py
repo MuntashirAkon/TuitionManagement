@@ -51,7 +51,7 @@ def view_profile(request, profile_id):
             return render(request, 'tutor/client_profile.html', context={
                 'profile': user[0],
                 'work_history': work_history,
-                'profile_img': os.path.basename(user.profile_img),
+                'profile_img': os.path.basename(user[0].profile_img),
             })
         else:
             return redirect('tutor-profile', request.user.pk)
