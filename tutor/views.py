@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from users.models import User, Verification, Phone
+from users.models import User, Verification, Phone, Education
 from tuition.models import Ad, Assignee, Proposal, Question, Answer
 from .models import TutorFeedback
 from django.utils import timezone
@@ -13,6 +13,7 @@ from django.urls import reverse
 from .decorators import tutor_required
 from time import time
 import os
+import datetime
 
 
 @tutor_required
@@ -61,8 +62,68 @@ def view_profile(request, profile_id):
 @tutor_required
 def edit_profile(request, profile_id):
     if request.POST:
-        # TODO: Handle edit profile
-        pass
+        name = request.POST.get('full_name', '')
+        bio = request.POST.get('bio', '')
+        location = request.POST.get('location', '')
+        gender = request.POST.get('gender', '')
+        title = request.POST.get('title', '')
+        overview = request.POST.get('overview', '')
+        expertise = request.POST.get('expertise', '')
+        user = User.objects.get(pk=request.user.pk)
+        # Change name
+        if name != '':
+            user.name = name
+        # Change bio
+        if bio != '':
+            user.bio = bio
+        # Change location
+        if location != '':
+            user.location = location
+        # Change gender
+        if gender != '':
+            if gender == 'male':
+                user.gender = 'Male'
+            elif gender == 'female':
+                user.gender = 'Female'
+        # Change overview title
+        if title != '':
+            user.title = title
+        # Change overview
+        if overview != '':
+            user.overview = overview
+        # Change expertise
+        if expertise != '':
+            user.expertise = expertise
+        # Add education
+        upper_bound = int(request.POST.get('upper_bound', ''))
+        if upper_bound >= 0:
+            Education.objects.filter(user=user).delete()
+            for i in range(upper_bound):
+                ins = request.POST.get('edu_ins_{}'.format(i), False)
+                deg = request.POST.get('edu_deg_{}'.format(i), False)
+                dep = request.POST.get('edu_dep_{}'.format(i), False)
+                fy = request.POST.get('edu_fy_{}'.format(i), False)  # date (yyyy-mm-dd)
+                ty = request.POST.get('edu_ty_{}'.format(i), False)  # date (yyyy-mm-dd)
+                res = request.POST.get('edu_res_{}'.format(i), False)
+                try:
+                    from_year = datetime.datetime.strptime(fy, "%Y-%m-%d").date()
+                except ValueError:
+                    from_year = False
+                try:
+                    to_year = datetime.datetime.strptime(ty, "%Y-%m-%d").date()
+                except ValueError:
+                    to_year = False
+                if ins and deg and dep and from_year and to_year and res:
+                    Education.objects.create(user=user, institute=ins, degree=deg, department=dep, result=res,
+                                             from_year=from_year, to_year=to_year)
+
+        # Upload user photo
+        if request.FILES.get('profile_img'):
+            file_name = handle_profile_image(request.FILES['profile_img'])
+            user.profile_img = file_name
+        user.save()
+        messages.success(request, 'Changes are saved successfully.')
+        return redirect('tutor-profile', user.pk)
     else:
         if request.user.pk == profile_id:
             user = User.objects.get(pk=profile_id)
@@ -278,7 +339,7 @@ def handle_verification_file(f):
 
 def is_profile_incomplete(request):
     user = User.objects.get(pk=request.user.pk)
-    if user.name == '' or user.bio == '' or user.location == '' or user.gender == '' or user.title == ''\
+    if user.name == '' or user.bio == '' or user.location == '' or user.gender == '' or user.title == '' \
             or user.overview == '' or user.expertise == '' or user.profile_img == '':
         return True
     return False
@@ -286,7 +347,8 @@ def is_profile_incomplete(request):
 
 def handle_profile_image(f):
     file_name = 'file_{}_{}'.format(int(time()), f.name)
-    with open('/Volumes/Fallout/Projects/TuitionManagament/TuitionMGMT/TuitionManagement/users/static/profile_imgs/{}'.format(file_name), 'wb+') as destination:
+    with open('/Volumes/Fallout/Projects/TuitionManagament/TuitionMGMT/TuitionManagement/users/static/profile_imgs/{}'
+                      .format(file_name), 'wb+') as destination:
         for chunk in f.chunks():
             destination.write(chunk)
     return file_name
