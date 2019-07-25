@@ -142,8 +142,6 @@ def view_profile(request, profile_id):
             'profile': user,
             'education': user.education_set.all().order_by('-to_year'),
             'work_history': work_history,
-            'tutor_profile': 'active',
-            'editable': True,
             'profile_img': os.path.basename(user.profile_img),
         })
     else:
