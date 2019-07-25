@@ -41,5 +41,14 @@
           {% endif %}
       </div>
     </div>
+    {% if show_feedback %}
+      {% if not feed.feedback %}
+        <a href="{% url 'tutor-feedback' feed.pk %}" class="btn btn-dark btn-small m-1">Provide feedback</a>
+      {% else %}
+        {% with feedback=feed.feedback %}
+          {% include 'tutor/feedback.inc.html' %}
+        {% endwith %}
+      {% endif %}
+    {% endif %}
   </div>
 </div>

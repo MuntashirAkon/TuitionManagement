@@ -15,6 +15,7 @@
                 </div>
             </div>
         </div>
+      {% with show_feedback=True %}
         <div class="history-archive">
             <a class="btn btn-light d-block text-left" data-toggle="collapse" href="#history_archive" role="button" aria-expanded="false" aria-controls="history_archive">
                 Archive <span class="badge badge-dark badge-pill" style="padding-top: 3px">{{ feed_archive.count }}</span>
@@ -27,5 +28,6 @@
                 </div>
             </div>
         </div>
+      {% endwith %}
     </div>
 {% endblock %}

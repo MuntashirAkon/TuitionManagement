@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from users.models import User, Verification, Phone
 from tuition.models import Ad, Assignee, Proposal, Question, Answer
+from .models import TutorFeedback
 from django.utils import timezone
 from django.contrib.auth import (
     logout as logout_user,
@@ -76,7 +77,6 @@ def edit_profile(request, profile_id):
 
 @tutor_required
 def history(request):
-    # TODO: show feedback for archived history
     # FIXME: There may be duplicate values
     archived_list = []
     archived_jobs = Assignee.objects.filter(tutor=request.user, to_date__lte=timezone.now())
@@ -101,6 +101,32 @@ def history(request):
         'feed_archive': {'list': get_feed_list(request, archived_list), 'count': len(archived_list)},
         'tutor_history': 'active',
     })
+
+
+@tutor_required
+def feedback(request, ad_id):
+    ad = Ad.objects.filter(pk=ad_id, assignee__tutor=request.user)
+    if not ad.exists():
+        return redirect('tutor-home')
+    ad = ad[0]
+    if request.POST:
+        allowed_rating = [1, 2, 3, 4, 5]
+        rating = int(request.POST.get('rating', ''))
+        _feedback = request.POST.get('feedback', '')
+        if rating not in allowed_rating:
+            messages.error(request, 'Invalid rating.')
+            return render(request, 'tutor/feedback.html', context={
+                'feed': get_feed(request, ad),
+                'feedback': _feedback,
+            })
+        if not TutorFeedback.objects.filter(ad=ad).exists():
+            TutorFeedback.objects.create(ad=ad, rating=rating, feedback=_feedback)
+        messages.success(request, 'Feedback added.')
+        return redirect('tutor-history')
+    else:
+        return render(request, 'tutor/feedback.html', context={
+            'feed': get_feed(request, ad),
+        })
 
 
 @tutor_required
@@ -213,6 +239,7 @@ def login(request):
 
 def get_feed(request, ad):
     proposal = ad.proposal_set.filter(tutor=request.user)
+    feedback = TutorFeedback.objects.filter(ad=ad)
     return {
         'pk': ad.pk,
         'title': ad.title,
@@ -231,6 +258,7 @@ def get_feed(request, ad):
         'proposal': proposal[0].proposal if proposal.exists() else False,
         'questions': ad.question_set,
         'answers': proposal[0].answer_set if proposal.exists() else False,
+        'feedback': feedback[0] if feedback else False,
     }
 
 
