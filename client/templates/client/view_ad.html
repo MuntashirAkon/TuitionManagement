@@ -35,4 +35,27 @@
       {% endfor %}
     </div>
     {% endif %}
+    {% if assignee %}
+        <p>Assigned to <a href="{% url 'client-profile' assignee.tutor.pk %}">{{ assignee.tutor.name }}</a></p>
+    {% endif %}
+    {% if running %}
+        <a href="{% url 'client-terminate' feed.pk %}" class="btn btn-dark btn-small m-1">End tuition</a>
+    {% endif %}
+
+    {% if c_feedback %}
+    {% with feedback=c_feedback %}
+    {% with whos_feedback='Your' %}
+        {% include 'tutor/feedback.inc.html' %}
+    {% endwith %}
+    {% endwith %}
+    {% elif assignee and not running %}
+        <a href="{% url 'client-feedback' feed.pk %}" class="btn btn-dark btn-small m-1">Provide feedback</a>
+    {% endif %}
+    {% if t_feedback %}
+    {% with feedback=t_feedback %}
+    {% with whos_feedback="Tutor's" %}
+        {% include 'tutor/feedback.inc.html' %}
+    {% endwith %}
+    {% endwith %}
+    {% endif %}
 {% endblock content %}

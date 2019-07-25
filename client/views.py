@@ -14,6 +14,7 @@ from time import time
 import datetime
 import os
 from .models import ClientFeedback
+from tutor.models import TutorFeedback
 
 
 @client_required
@@ -26,17 +27,37 @@ def home(request):
         ),
         'display_url': True,
         'client_home': 'active',
+        'show_applicant_number': True,
     })
 
 
 @client_required
-def view_applicants(request, ad_id):
-    ad = Ad.objects.filter(pk=ad_id, taken=False, timeout__gte=timezone.now(), client=request.user)
+def view_ad(request, ad_id):
+    ad = Ad.objects.filter(pk=ad_id, client=request.user)
     if ad.exists():
-        proposals = Proposal.objects.filter(ad=ad_id)
+        ad = ad[0]
+        if ad.taken:
+            proposals = False
+            assignee = Assignee.objects.get(ad=ad)
+            c_feedback = ClientFeedback.objects.filter(ad=ad)
+            c_feedback = c_feedback[0] if c_feedback.exists() else False
+            t_feedback = TutorFeedback.objects.filter(ad=ad)
+            t_feedback = t_feedback[0] if t_feedback.exists() else False
+            _running = assignee.to_date is None or assignee.to_date > timezone.now().date()
+        else:
+            proposals = Proposal.objects.filter(ad=ad_id)
+            proposals = proposals if proposals.exists() else False
+            assignee = False
+            c_feedback = False
+            t_feedback = False
+            _running = False
         return render(request, 'client/view_ad.html', context={
-            'feed': get_feed(request, ad[0]),
-            'proposals': proposals if proposals.exists() else False,
+            'feed': get_feed(request, ad),
+            'proposals': proposals,
+            'assignee': assignee,
+            'c_feedback': c_feedback,
+            't_feedback': t_feedback,
+            'running': _running,
         })
     else:
         return redirect('client-home')
@@ -44,8 +65,6 @@ def view_applicants(request, ad_id):
 
 @client_required
 def feedback(request, ad_id):
-    # FIXME: Redirect to the ad instead? Again, redirecting to the ad needs further improvement
-    #        in the client-ad since it only shows proposals.
     ad = Ad.objects.filter(pk=ad_id, taken=True, client=request.user)
     if not ad.exists():
         return redirect('client-home')
@@ -63,7 +82,7 @@ def feedback(request, ad_id):
         if not ClientFeedback.objects.filter(ad=ad).exists():
             ClientFeedback.objects.create(ad=ad, rating=rating, feedback=_feedback)
         messages.success(request, 'Feedback added.')
-        return redirect('client-history')
+        return redirect('client-applicants', ad.pk)
     else:
         return render(request, 'client/feedback.html', context={
             'feed': get_feed(request, ad),
@@ -72,25 +91,21 @@ def feedback(request, ad_id):
 
 @client_required
 def accept(request, ad_id, user_id):
-    # FIXME: Redirect to the ad instead? Again, redirecting to the ad needs further improvement
-    #        in the client-ad since it only shows proposals.
     ad = Ad.objects.get(pk=ad_id, client=request.user)
     ad.taken = True
     Assignee.objects.create(ad=ad, tutor_id=user_id, from_date=timezone.now())
     ad.save()
     messages.success(request, 'Proposal is accepted successfully.')
-    return redirect('client-running')
+    return redirect('client-applicants', ad.pk)
 
 
 @client_required
 def terminate(request, ad_id):
-    # FIXME: Redirect to the ad instead? Again, redirecting to the ad needs further improvement
-    #        in the client-ad since it only shows proposals.
     ad = Assignee.objects.get(ad_id=ad_id, ad__client=request.user)
     ad.to_date = timezone.now()
     ad.save()
-    messages.success(request, 'The tuition is terminated successfully!')  # FIXME: Prompt for feedback?
-    return redirect('client-history')
+    messages.success(request, 'The tuition is terminated successfully!')
+    return redirect('client-applicants', ad.pk)
 
 
 @client_required
@@ -190,6 +205,8 @@ def history(request):
         'feed_archive': get_feed_list(request, archived_list),
         'client_history': 'active',
         'show_feedback': True,
+        'display_url': True,
+        'whos_feedback': 'Your',
     })
 
 
@@ -207,6 +224,7 @@ def running(request):
         'feed_list': get_feed_list(request, active_list),
         'client_running': 'active',
         'show_end_job': True,
+        'display_url': True,
     })
 
 

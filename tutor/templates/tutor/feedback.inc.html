@@ -1,5 +1,5 @@
 <p class="card-text small">
-  <span class="text-muted">Feedback:</span><br>
+  <span class="text-muted">{{ whos_feedback }} Feedback:</span><br>
   {# Print filled stars #}
   {% with ''|center:feedback.rating as range %}
   {% for _ in range %}
