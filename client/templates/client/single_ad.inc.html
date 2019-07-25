@@ -34,7 +34,16 @@
       <div class="col-md-6" title="Location"><i class="fa fa-map-marked"></i> {{ feed.location }}</div>
     </div>
     {% if show_end_job %}
-        <a href="{% url 'client-terminate' feed.pk %}" class="btn btn-dark">End tuition</a>
+        <a href="{% url 'client-terminate' feed.pk %}" class="btn btn-dark btn-small m-1">End tuition</a>
+    {% endif %}
+    {% if show_feedback %}
+      {% if not feed.feedback %}
+        <a href="{% url 'client-feedback' feed.pk %}" class="btn btn-dark btn-small m-1">Provide feedback</a>
+      {% else %}
+        {% with feedback=feed.feedback %}
+          {% include 'tutor/feedback.inc.html' %}
+        {% endwith %}
+      {% endif %}
     {% endif %}
   </div>
 </div>

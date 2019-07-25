@@ -13,6 +13,7 @@ from .decorators import client_required
 from time import time
 import datetime
 import os
+from .models import ClientFeedback
 
 
 @client_required
@@ -39,6 +40,34 @@ def view_applicants(request, ad_id):
         })
     else:
         return redirect('client-home')
+
+
+@client_required
+def feedback(request, ad_id):
+    # FIXME: Redirect to the ad instead? Again, redirecting to the ad needs further improvement
+    #        in the client-ad since it only shows proposals.
+    ad = Ad.objects.filter(pk=ad_id, taken=True, client=request.user)
+    if not ad.exists():
+        return redirect('client-home')
+    ad = ad[0]
+    if request.POST:
+        allowed_rating = [1, 2, 3, 4, 5]
+        rating = int(request.POST.get('rating', ''))
+        _feedback = request.POST.get('feedback', '')
+        if rating not in allowed_rating:
+            messages.error(request, 'Invalid rating.')
+            return render(request, 'client/feedback.html', context={
+                'feed': get_feed(request, ad),
+                'feedback': _feedback,
+            })
+        if not ClientFeedback.objects.filter(ad=ad).exists():
+            ClientFeedback.objects.create(ad=ad, rating=rating, feedback=_feedback)
+        messages.success(request, 'Feedback added.')
+        return redirect('client-history')
+    else:
+        return render(request, 'client/feedback.html', context={
+            'feed': get_feed(request, ad),
+        })
 
 
 @client_required
@@ -150,7 +179,6 @@ def view_profile(request, profile_id):
 
 @client_required
 def history(request):
-    # TODO: show feedback for archived history
     archived_list = []
     archived_jobs = Assignee.objects.filter(to_date__lte=timezone.now(), ad__client=request.user)
     for obj in archived_jobs:
@@ -161,6 +189,7 @@ def history(request):
     return render(request, 'client/history.html', context={
         'feed_archive': get_feed_list(request, archived_list),
         'client_history': 'active',
+        'show_feedback': True,
     })
 
 
@@ -288,6 +317,7 @@ def login(request):
 
 
 def get_feed(request, ad):
+    feedback = ClientFeedback.objects.filter(ad=ad)
     return {
         'ad': ad,
         'pk': ad.pk,
@@ -304,6 +334,7 @@ def get_feed(request, ad):
         'location': ad.location,
         'client': ad.client,
         'proposals': ad.proposal_set.count(),
+        'feedback': feedback[0] if feedback else False,
     }
 
 
