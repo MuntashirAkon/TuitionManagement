@@ -134,7 +134,7 @@ def new(request):
         days = request.POST.get('days', False)
         location = request.POST.get('location', False)
         salary = request.POST.get('salary', False)
-        timeout = request.POST.get('timeout', False)  # date
+        timeout = request.POST.get('timeout', False)  # date FIXME: the date format may be wrong
         try:
             t_timeout = datetime.datetime.strptime(timeout, "%d/%m/%Y").date()
         except ValueError:
@@ -206,6 +206,7 @@ def history(request):
         'client_history': 'active',
         'show_feedback': True,
         'display_url': True,
+        'show_assignee': True,
         'whos_feedback': 'Your',
     })
 
@@ -224,6 +225,7 @@ def running(request):
         'feed_list': get_feed_list(request, active_list),
         'client_running': 'active',
         'show_end_job': True,
+        'show_assignee': True,
         'display_url': True,
     })
 
@@ -335,7 +337,7 @@ def login(request):
 
 
 def get_feed(request, ad):
-    feedback = ClientFeedback.objects.filter(ad=ad)
+    _feedback = ClientFeedback.objects.filter(ad=ad)
     return {
         'ad': ad,
         'pk': ad.pk,
@@ -352,7 +354,7 @@ def get_feed(request, ad):
         'location': ad.location,
         'client': ad.client,
         'proposals': ad.proposal_set.count(),
-        'feedback': feedback[0] if feedback else False,
+        'feedback': _feedback[0] if _feedback.exists() else False,
     }
 
 
